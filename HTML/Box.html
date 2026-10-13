@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Box</title>
+  <link rel="stylesheet" href="https://unpkg.com/xp.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist+Pixel&display=swap" rel="stylesheet">
+
+  <style>
+    h3 { font-family: Tahoma; }
+
+    body {
+      margin: 0px;
+      background-image: url(https://static.wikitide.net/windowswallpaperwiki/c/cf/Bliss.jpg);
+      background-size: cover;
+      background-repeat: no-repeat;
+      overflow: hidden;
+    }
+
+    .app-window {
+      position: absolute;
+      width: 1000px;
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #window-template { display: none; }
+
+    .app-window .window-body { flex: 1; overflow: auto; }
+    .app-window .title-bar { cursor: move; user-select: none; }
+    .app-window.maximized .title-bar { cursor: default; }
+
+    #Footer {
+      position: absolute;
+      bottom: 0px;
+      left: 0;
+      right: 0;
+      z-index: 100000;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 4px;
+    }
+
+    #taskbar-items { display: flex; gap: 4px; }
+
+    .taskbar-btn {
+      min-width: 140px;
+      text-align: left;
+      font-family: Tahoma;
+    }
+
+    .taskbar-btn.active { font-weight: bold; }
+
+    #desktop-icon {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      width: 70px;
+      text-align: center;
+      color: white;
+      font-family: Tahoma;
+      font-size: 12px;
+      text-shadow: 1px 1px 2px black;
+      cursor: pointer;
+      user-select: none;
+    }
+    #desktop-icon .icon { font-size: 36px; }
+
+    .IconImage {
+      height: 80px;
+      width: 80px;
+    }
+
+    .IconText {
+      font-family: Tahoma;
+      font-size: 20px;
+    }
+
+
+    .BoxModel {
+
+        background-color: #FF8DA1;
+        width: 15vw; /* Gumagamit ng vh at vw imbes na % para naka scale sa size ng monitor at di yung size ng tab*/
+        height: 60%;
+        border-width: 3vw;
+        border-color: #00FF00;
+        border-style: solid;
+        padding: 3vw;
+        margin: 3vw;
+        align-content: center;
+        container-type: inline-size;
+
+
+
+    }
+
+    .Description {
+
+        font-size: 40px;
+        font-family: Geist Pixel;
+        margin: 0;
+
+
+    }
+
+    .Content {
+
+        text-align: left;
+        font-size: 18px
+
+
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <div id="desktop-icon" title="Double-click to open">
+    <div class="icon"><img class="IconImage" src="https://static.wikia.nocookie.net/logopedia/images/c/c4/Notepad_Vista_10.png/revision/latest?cb=20181031102045" alt="Computer"></div>
+    <div class="IconText">Computer</div>
+  </div>
+
+  <div class="title-bar" id="Footer">
+    <div class="title-bar-text">Jerricho O. Beatriz <span style="margin-left: 20px;"> 10-Modesty</span></div>
+    <div id="taskbar-items"></div>
+  </div>
+
+  <div class="window app-window" id="window-template">
+    <div class="title-bar">
+      <div class="title-bar-text">Computer</div>
+      <div class="title-bar-controls">
+        <button aria-label="Minimize"></button>
+        <button aria-label="Maximize"></button>
+        <button aria-label="Close"></button>
+      </div>
+    </div>
+    <div class="window-body">
+        <p class="Description">This section defines what a computer is:</p>
+      <div class="BoxModel">
+        <p class="Content">
+A computer is a
+programmable machine.
+The two principal
+characteristics of a
+computer are: It responds
+to a specific set of
+instructions in a well-
+defined manner and it can
+execute a pre-recorded list
+of instructions.
+
+        </p>
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const footer = document.getElementById("Footer");
+    const taskbarItems = document.getElementById("taskbar-items");
+    const desktopIcon = document.getElementById("desktop-icon");
+    const template = document.getElementById("window-template");
+
+    const windows = [];   // every open window's state
+    let zCounter = 10;
+    let windowCount = 0;
+
+    function createWindow() {
+      windowCount++;
+      const n = windowCount;
+      const title = "Computer";
+
+      const el = template.cloneNode(true);
+      el.removeAttribute("id");   // avoid duplicate ids (also un-hides it)
+
+      const offset = ((n - 1) % 10) * 30;
+      el.style.top = (100 + offset) + "px";
+      el.style.left = "calc(10% + " + offset + "px)";
+
+      el.querySelector(".title-bar-text").textContent = title;
+
+      document.body.appendChild(el);
+
+      const titlebar = el.querySelector(".title-bar");
+      const btnMin = el.querySelector('[aria-label="Minimize"]');
+      const btnMax = el.querySelector('[aria-label="Maximize"]');
+      const btnClose = el.querySelector('[aria-label="Close"]');
+
+      const taskbarBtn = document.createElement("button");
+      taskbarBtn.className = "taskbar-btn";
+      taskbarBtn.textContent = title;
+      taskbarItems.appendChild(taskbarBtn);
+
+      const state = {
+        el,
+        taskbarBtn,
+        isMaximized: false,
+        isMinimized: false,
+        savedRect: null
+      };
+      windows.push(state);
+
+      function minimize() {
+        el.style.display = "none";
+        state.isMinimized = true;
+        taskbarBtn.classList.remove("active");
+      }
+
+      function restore() {
+        el.style.display = "flex";
+        state.isMinimized = false;
+        focusWindow(state);
+      }
+
+      function maximize() {
+        state.savedRect = {
+          top: el.style.top || el.offsetTop + "px",
+          left: el.style.left || el.offsetLeft + "px",
+          width: el.style.width || el.offsetWidth + "px",
+          height: el.style.height || el.offsetHeight + "px"
+        };
+        el.style.top = "0px";
+        el.style.left = "0px";
+        el.style.width = "100vw";
+        el.style.height = (window.innerHeight - footer.offsetHeight) + "px";
+        el.classList.add("maximized");
+        btnMax.setAttribute("aria-label", "Restore");
+        state.isMaximized = true;
+      }
+
+      function unmaximize() {
+        if (state.savedRect) {
+          el.style.top = state.savedRect.top;
+          el.style.left = state.savedRect.left;
+          el.style.width = state.savedRect.width;
+          el.style.height = state.savedRect.height;
+        }
+        el.classList.remove("maximized");
+        btnMax.setAttribute("aria-label", "Maximize");
+        state.isMaximized = false;
+      }
+
+      function toggleMaximize() {
+        state.isMaximized ? unmaximize() : maximize();
+      }
+
+      function close() {
+        el.remove();
+        taskbarBtn.remove();
+        const i = windows.indexOf(state);
+        if (i !== -1) windows.splice(i, 1);
+      }
+
+      btnMin.onclick = minimize;
+      btnMax.onclick = toggleMaximize;
+      btnClose.onclick = close;
+
+      titlebar.addEventListener("dblclick", (e) => {
+        if (e.target.closest("button")) return;
+        toggleMaximize();
+      });
+
+      el.addEventListener("mousedown", () => focusWindow(state));
+
+      taskbarBtn.onclick = () => {
+        if (state.isMinimized) {
+          restore();
+        } else if (taskbarBtn.classList.contains("active")) {
+          minimize();
+        } else {
+          focusWindow(state);
+        }
+      };
+
+      dragElement(state, titlebar);
+      focusWindow(state);
+
+      if (typeof onWindowCreated === "function") onWindowCreated(el, state);
+    }
+
+    function focusWindow(state) {
+      zCounter++;
+      state.el.style.zIndex = zCounter;
+      windows.forEach(w => w.taskbarBtn.classList.toggle("active", w === state));
+    }
+
+    function dragElement(state, handle) {
+      const elmnt = state.el;
+      let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+
+      handle.addEventListener("mousedown", (e) => {
+        if (e.target.closest("button")) return;
+        if (state.isMaximized) return;
+        e.preventDefault();
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.addEventListener("mousemove", elementDrag);
+        document.addEventListener("mouseup", closeDragElement);
+      });
+
+      function elementDrag(e) {
+        e.preventDefault();
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+      }
+
+      function closeDragElement() {
+        document.removeEventListener("mousemove", elementDrag);
+        document.removeEventListener("mouseup", closeDragElement);
+      }
+    }
+
+    desktopIcon.addEventListener("dblclick", createWindow);
+
+    window.addEventListener("resize", () => {
+      windows.forEach(w => {
+        if (w.isMaximized) {
+          w.el.style.height = (window.innerHeight - footer.offsetHeight) + "px";
+        }
+      });
+    });
+
+    createWindow();
+  </script>
+</body>
+</html>
