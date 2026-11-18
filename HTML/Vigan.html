@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vigan City</title>
+
+<script src="https://cdn.jsdelivr.net/npm/animejs/dist/bundles/anime.umd.min.js"></script>
+<script>
+  const { animate, createTimeline, splitText, stagger, utils } = anime;
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.15/dist/Observer.min.js"></script>
+
+<style>
+    :root {
+        --paper: #f3e5c8;
+        --ink: #3b2a1a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        background-color: var(--ink);
+        color: var(--paper);
+        overflow: hidden;
+    }
+
+    a, p, h1, h2, h3, h4, h5, h6, li, span, label, button {
+        font-family: Georgia, serif;
+        line-height: 1.6;
+        color: inherit;
+    }
+
+    .stage {
+        position: relative;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+        background: var(--ink);
+    }
+
+    .zoomer {
+        position: absolute;
+        inset: 0;
+    }
+
+    .scene {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: max(100vw, 152.381vh);
+        height: max(100vh, 65.625vw);
+        background-image: url("MainStreet.jpg");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+    }
+
+    .house {
+        position: absolute;
+        background-repeat: no-repeat;
+        background-size: contain;
+        aspect-ratio: 518 / 805;
+    }
+
+    .House1 { background-image: url(House1.png); }
+    .House2 { background-image: url(House2.png); }
+
+    .title {
+        position: absolute;
+        top: 10vh;
+        left: 0;
+        width: 100%;
+        text-align: center;
+        z-index: 25;
+        pointer-events: none;
+        color: #fff;
+        text-shadow: 0 2px 18px rgba(0,0,0,0.7);
+    }
+
+    .title h1 {
+        font-size: clamp(2.4rem, 7vw, 5.5rem);
+        letter-spacing: 0.08em;
+        font-weight: normal;
+    }
+
+    .interior {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        background: var(--ink);
+    }
+
+    .room {
+        position: absolute;
+        inset: 0;
+        background-color: var(--ink);
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
+    }
+
+    #House1 { background-image: url("InsideHouse1.webp"); }
+    #House2 { background-image: url("InsideHouse2.jpg"); }
+
+    .room-text {
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        bottom: 6vh;
+        width: min(700px, 90%);
+        padding: 22px 28px;
+        background: rgba(243, 229, 200, 0.92);
+        color: var(--ink);
+        border-radius: 6px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    .room-text h2 { margin-bottom: 6px; }
+
+    .leave {
+        position: absolute;
+        top: 24px;
+        left: 24px;
+        z-index: 55;
+        padding: 10px 18px;
+        font-size: 1rem;
+        color: var(--ink);
+        background: rgba(243, 229, 200, 0.92);
+        border: none;
+        border-radius: 4px;
+    }
+
+    .transition {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        background: #000;
+        pointer-events: none;
+    }
+
+    .Link {
+
+        position: fixed;
+        bottom: 20px;
+        left: 2%;
+        background-color: var(--paper);
+        color: var(--ink);
+        border-radius: 5px;
+        padding: 1px;
+        padding-left: 10px;
+        padding-right: 10px;
+        z-index: 30;
+
+    }
+
+.info-tab {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 20px;
+    margin: 0 auto;
+    z-index: 30;
+    width: min(420px, 90vw);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.info-tab > * { pointer-events: auto; }
+
+.info-toggle {
+    width: 80%;
+    padding: 6px 16px;
+    font-size: 1rem;
+    color: var(--ink);
+    background:  var(--paper);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+}
+
+.info-text {
+    width: 150%;
+    padding: 22px 28px;
+    background: rgba(243, 229, 200, 0.92);
+    color: var(--ink);
+    border-radius: 6px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+.info-text h2 { margin-bottom: 6px; }
+
+</style>
+</head>
+<body>
+
+
+    <div class="stage">
+
+        <div class="zoomer">
+            <div class="scene">
+                <div class="house House1" data-page="House1"></div>
+                <div class="house House2" data-page="House2"></div>
+            </div>
+        </div>
+
+        <div class="title">
+            <h1>Vigan City</h1>
+        </div>
+
+
+        <div class="info-tab" id="infoTab">
+    <div class="info-text" id="infoText">
+        <h2>About Vigan</h2>
+        <p>Vigan, officially the City of Vigan, is a component city and capital of the province of Ilocos Sur, Philippines. 
+
+Located on the western coast of the large island of Luzon, facing the South China Sea, it is a UNESCO World Heritage Site and it is one of the few Spanish colonial towns left in the Philippines whose old structures have mostly remained intact. It is well known for its sett pavements and a unique architecture of the Spanish colonial era which fuses native Philippine and Oriental building designs and construction, with colonial Spanish architecture that is still abundant in the area, mainly the bahay na bato houses and an Earthquake Baroque church.</p>
+    </div>
+    <button class="info-toggle" id="infoToggle" aria-expanded="false">About Vigan</button>
+</div>
+
+
+    </div>
+
+
+    <!-- Each room's id must match a house's data-page above -->
+    <div class="interior" id="interior">
+
+        <button class="leave" id="leave">Go back</button>
+
+        <section id="House1" class="room">
+            <div class="room-text">
+                <h2>Tourism</h2>
+                <p>Calle Crisologo is the best-known tourist area in Vigan and is characterized by its sett pavement and rows of preserved ancestral houses. Many of the buildings combine brick and stone lower levels with wooden upper floors, capiz-shell windows, and steeply pitched roofs. The street contains shops, restaurants, souvenir stores, and other establishments operating within historic structures. Traditional kalesas, or horse-drawn carriages, are also used in the historic district and form an important part of the city's tourism experience.
+
+Other heritage attractions include the Plaza Salcedo and Plaza Burgos areas, ancestral houses in the Mestizo District, and several museums housed in historic buildings. The city's heritage tourism program emphasizes the preservation of historic structures while allowing them to accommodate contemporary residential, commercial, cultural, and tourism-related uses</p>
+
+            </div>
+             <a href="" class="Link"> Click Here to Learn More</a>
+
+        </section>
+
+        <section id="House2" class="room">
+            <div class="room-text">
+                <h2>Arts & Crafts</h2>
+                <p>The city is known for burnay, a traditional form of pottery made from local clay. Visitors can visit pottery workshops in the Pagburnayan area and observe traditional jar-making techniques. Some workshops also provide opportunities for visitors to experience pottery-making themselves.
+
+Vigan is also associated with Abel Iloko, the traditional handwoven textile of the Ilocos region. Weaving demonstrations and textile products allow visitors to learn about traditional weaving techniques and the continuing role of handwoven textiles in Ilocano culture. The preservation and transmission of these traditional skills form part of Vigan's wider heritage-conservation program</p>
+
+            </div>
+                 
+
+        </section>
+    </div>
+
+    <div class="transition" id="transition"></div>
+
+    <a href="" class="Link"> Click Here to Learn More</a>
+
+
+ <script>
+    gsap.registerPlugin(Observer);
+
+    const houseEls = gsap.utils.toArray('.house');
+    const rooms    = gsap.utils.toArray('.room');
+    const interior = document.getElementById('interior');
+    const transition  = document.getElementById('transition');
+    const zoomer   = document.querySelector('.zoomer');
+    const title    = document.querySelector('.title');
+    const leaveBtn = document.getElementById('leave');
+    const link     = document.querySelector('.Link');
+
+    const infoTab    = document.getElementById('infoTab');
+    const infoText   = document.getElementById('infoText');
+    const infoToggle = document.getElementById('infoToggle');
+    let infoOpen = false;
+
+    gsap.set(infoText, { autoAlpha: 0, y: 20 });
+
+    function setInfo(open) {
+     infoOpen = open;
+     infoToggle.setAttribute('aria-expanded', open);
+     infoToggle.textContent = open ? 'Close' : 'About Vigan';
+     gsap.to(infoText, {
+        autoAlpha: open ? 1 : 0,
+        y: open ? 0 : 20,
+        duration: 0.5,
+        ease: 'power3.out',
+        overwrite: 'auto'
+       });
+    }
+
+infoToggle.addEventListener('click', () => {
+    if (busy || inside) return;
+    setInfo(!infoOpen);
+});
+
+    let busy = false;
+    let inside = false;
+    let currentOrigin = '50% 50%';
+
+    const houses = {
+        House1: {
+            place: { left: '17%', width: '40.4%', zIndex: 2 },
+            hover: { x: 0,  y: -30, scale: 1.1 },
+            hoverZ: 2
+        },
+        House2: {
+            place: { left: '53%', width: '21%', top: '28.5%', zIndex: 1 },
+            hover: { x: 15, y: 0, scale: 1.2 },
+            hoverZ: 3
+        }
+    };
+
+    gsap.set(interior, { autoAlpha: 0 });
+    gsap.set(rooms,    { autoAlpha: 0 });
+    gsap.set(transition,  { opacity: 0 });
+    gsap.set(leaveBtn, { cursor: 'pointer' });
+
+    const { chars } = splitText('.title h1', { chars: true });
+    utils.set(chars, { display: 'inline-block', opacity: 0 });
+
+    animate(chars, {
+        opacity: [0, 1],
+        translateY: ['-0.8em', 0],
+        rotate: [-8, 0],
+        duration: 1000,
+        delay: stagger(70),
+        ease: 'outExpo'
+    });
+
+gsap.fromTo(link,
+    { autoAlpha: 0, y: 30 },
+    { autoAlpha: 1, y: 0, duration: 1.2, delay: 1.8, ease: 'expo.out' }
+);
+
+gsap.fromTo(link,
+    { autoAlpha: 0, y: 30 },
+    { autoAlpha: 1, y: 0, duration: 1.2, delay: 1.8, ease: 'expo.out' }
+);
+
+    Observer.create({
+        target: link,
+        type: 'pointer',
+        onHover: () => gsap.to(link, {
+            backgroundColor: 'rgba(243, 229, 200, 0.92)',
+            color: '#3b2a1a',
+            duration: 0.3,
+            overwrite: 'auto'
+        }),
+        onHoverEnd: () => gsap.to(link, {
+            backgroundColor: 'rgba(243, 229, 200, 0)',
+            color: '#ffffff',
+            duration: 0.3,
+            overwrite: 'auto'
+        })
+    });
+
+    const roomWords = {};
+    rooms.forEach(room => {
+        const { words } = splitText(room.querySelectorAll('h2, p'), { words: true });
+        utils.set(words, { display: 'inline-block', opacity: 0 });
+        roomWords[room.id] = words;
+    });
+
+    houseEls.forEach(el => {
+        const name = el.dataset.page;
+        const cfg  = houses[name];
+
+        gsap.set(el, { ...cfg.place, cursor: 'pointer' });
+
+        Observer.create({
+            target: el,
+            type: 'pointer',
+            onHover: () => {
+                if (busy || inside) return;
+                gsap.to(el, {
+                    ...cfg.hover, zIndex: cfg.hoverZ,
+                    duration: 0.5, ease: 'power2.inOut', overwrite: 'auto'
+                });
+            },
+            onHoverEnd: () => {
+                if (busy || inside) return;
+                gsap.to(el, {
+                    x: 0, y: 0, scale: 1, zIndex: cfg.place.zIndex,
+                    duration: 0.5, ease: 'power2.inOut', overwrite: 'auto'
+                });
+            },
+            onClick: () => enterHouse(name, el)
+        });
+    });
+
+    Observer.create({
+        target: leaveBtn,
+        type: 'pointer',
+        onClick: () => leaveHouse()
+    });
+
+    function enterHouse(name, el) {
+        if (busy || inside) return;
+        busy = true;
+
+        const r = el.getBoundingClientRect();
+        currentOrigin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`;
+        gsap.set(zoomer, { transformOrigin: currentOrigin });
+
+        const room  = document.getElementById(name);
+        const box   = room.querySelector('.room-text');
+        const words = roomWords[name];
+
+        gsap.timeline({ onComplete: () => { busy = false; inside = true; } })
+            .to(title,   { autoAlpha: 0, duration: 0.4 }, 0)
+            .to(link,    { autoAlpha: 0, duration: 0.4 }, 0)
+            .to(infoTab, { autoAlpha: 0, duration: 0.4 }, 0)
+            .add(() => setInfo(false), 0)
+            .to(zoomer,  { scale: 3, duration: 1.1, ease: 'power2.in' }, 0)
+            .to(transition, { opacity: 1, duration: 0.35 }, '-=0.35')
+            .add(() => {
+                gsap.set(rooms,    { autoAlpha: 0 });
+                gsap.set(room,     { autoAlpha: 1 });
+                gsap.set(interior, { autoAlpha: 1 });
+
+                gsap.fromTo(box,
+                    { autoAlpha: 0, y: 30 },
+                    { autoAlpha: 1, y: 0, duration: 1, delay: 0.5, ease: 'power3.out' }
+                );
+
+                utils.set(words, { opacity: 0 });
+                createTimeline({ defaults: { ease: 'outExpo' } })
+                    .add(room, { scale: [1.15, 1], duration: 1600 }, 0)
+                    .add(words, {
+                        opacity: [0, 1],
+                        translateY: ['0.6em', 0],
+                        duration: 800,
+                        delay: stagger(60)
+                    }, 800);
+            })
+            .to(transition, { opacity: 0, duration: 0.6 });
+    }
+
+    function leaveHouse() {
+        if (busy || !inside) return;
+        busy = true;
+        inside = false;
+
+        gsap.timeline({ onComplete: () => { busy = false; } })
+            .to(transition, { opacity: 1, duration: 0.4 })
+            .add(() => {
+                gsap.set([interior, ...rooms], { autoAlpha: 0 });
+                gsap.set(zoomer, { transformOrigin: currentOrigin, scale: 3 });
+                houseEls.forEach(el => {
+                    gsap.set(el, { x: 0, y: 0, scale: 1, zIndex: houses[el.dataset.page].place.zIndex });
+                });
+            })
+            .to(zoomer,  { scale: 1, duration: 1.1, ease: 'power2.out' })
+            .to(transition, { opacity: 0, duration: 0.6 }, '<')
+            .to(title,   { autoAlpha: 1, duration: 0.6 }, '<')
+            .to(link,    { autoAlpha: 1, duration: 0.6 }, '<')
+            .to(infoTab, { autoAlpha: 1, duration: 0.6 }, '<');
+    }
+</script>
+
+</body>
+</html>
